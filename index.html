@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Zorin Fleet</title>
+    <!-- Tailwind + Font Awesome + Chart.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* Override Tailwind defaults to feel more native */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: #1e1f28;
+        }
+        /* Native‑style scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #2a2c35; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #5a5f73; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7c83a0; }
+
+        /* Indented Z (debossed) inside hexagon */
+        .z-deboss {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(145deg, #2b3b5c, #1a2538);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 32px;
+            color: #8f9bb5;
+            text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 2px 4px rgba(255,255,255,0.05);
+            background-blend-mode: overlay;
+        }
+        /* For larger splash logo */
+        .splash-logo {
+            width: 120px;
+            height: 120px;
+            font-size: 64px;
+            background: linear-gradient(145deg, #2b3b5c, #0f1728);
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.6), 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Splash animations (flare + swipe) */
+        .splash {
+            position: fixed;
+            inset: 0;
+            background: #0a0e14;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes flarePulse {
+            0% { transform: scale(0.8); opacity: 0; box-shadow: inset 0 0 0 0 rgba(63,140,255,0.2), 0 0 0 0 rgba(63,140,255,0.4);}
+            70% { transform: scale(1.05);}
+            100% { transform: scale(1); opacity: 1; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 0 0 0 rgba(63,140,255,0);}
+        }
+        .splash-text {
+            margin-top: 32px;
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            background: linear-gradient(120deg, #fff, #a0b9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: swipeReveal 0.9s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            animation-delay: 0.3s;
+        }
+        @keyframes swipeReveal {
+            0% { opacity: 0; transform: translateY(30px); clip-path: inset(0 100% 0 0);}
+            100% { opacity: 1; transform: translateY(0); clip-path: inset(0 0 0 0);}
+        }
+        .splash.hide { opacity: 0; pointer-events: none; }
+
+        /* Premium card style – lighter, softer */
+        .device-card {
+            background: #2a2c36;
+            border: 1px solid #3e4050;
+            border-radius: 16px;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+        }
+        .device-card:hover {
+            background: #31343e;
+            border-color: #5e6b93;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -12px rgba(0,0,0,0.4);
+        }
+        /* Refined buttons – less chunky, native feel */
+        .btn-native {
+            background: #3a3c47;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: all 0.1s ease;
+            line-height: 1.4;
+        }
+        .btn-native:hover {
+            background: #4a4e60;
+            transform: translateY(-1px);
+        }
+        .btn-primary {
+            background: #2b7be4;
+            color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .btn-primary:hover {
+            background: #1c66c7;
+            transform: translateY(-1px);
+        }
+        /* Side panel (app‑like) */
+        .side-panel {
+            background: #24262f;
+            border-left: 1px solid #3a3c47;
+            box-shadow: -6px 0 24px rgba(0,0,0,0.3);
+        }
+        /* Modal native */
+        .modal-content {
+            background: #2a2c36;
+            border: 1px solid #4a4e60;
+            border-radius: 20px;
+            box-shadow: 0 24px 40px rgba(0,0,0,0.4);
+        }
+        /* Terminal input */
+        .terminal-input {
+            background: #1a1c23;
+            border: 1px solid #3e4050;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 13px;
+            color: #e2e4ec;
+            border-radius: 10px;
+        }
+        /* Quick action buttons inside cards – more compact */
+        .quick-btn {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        /* Dropdown and inputs */
+        select, input, textarea {
+            transition: border-color 0.1s, box-shadow 0.1s;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #2b7be4;
+            box-shadow: 0 0 0 2px rgba(43,123,228,0.2);
+        }
+    </style>
+</head>
+<body class="bg-[#1e1f28] text-gray-200 antialiased">
+
+    <!-- Splash screen with indented Z -->
+    <div id="splash" class="splash">
+        <div class="z-deboss splash-logo">Z</div>
+        <div class="splash-text">ZORIN FLEET</div>
+    </div>
+
+    <!-- Main App (hidden initially) -->
+    <div id="app" class="hidden max-w-7xl mx-auto px-5 py-6">
+        <!-- Header with debossed Z -->
+        <div class="flex flex-wrap justify-between items-center border-b border-[#3a3c47] pb-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="z-deboss">Z</div>
+                <div>
+                    <h1 class="text-2xl font-semibold tracking-tight">Zorin Fleet</h1>
+                    <p class="text-gray-400 text-xs">Multi‑device command & control</p>
+                </div>
+            </div>
+            <button id="openAddModalBtn" class="btn-native btn-primary flex items-center gap-2 px-4 py-1.5">
+                <i class="fas fa-plus text-sm"></i> <span>Add computer</span>
+            </button>
+        </div>
+
+        <!-- Device grid -->
+        <div id="devicesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- dynamic -->
+        </div>
+    </div>
+
+    <!-- Side panel (native) -->
+    <div id="sidePanel" class="side-panel fixed right-0 top-0 h-full w-96 transform translate-x-full transition-transform duration-300 z-40 p-5 flex flex-col gap-4">
+        <div class="flex justify-between items-center">
+            <h2 class="text-md font-semibold"><i class="fas fa-bell mr-2 text-blue-400"></i> Quick actions</h2>
+            <button id="closePanelBtn" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">Target device</label>
+            <select id="notifyDeviceSelect" class="w-full bg-[#1a1c23] border border-[#3e4050] rounded-lg p-2 text-sm"></select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">Notification message</label>
+            <textarea id="notifyMessage" rows="3" class="w-full bg-[#1a1c23] border border-[#3e4050] rounded-lg p-2 text-sm" placeholder="Text to show on remote desktop"></textarea>
+            <button id="sendNotifyBtn" class="mt-2 w-full btn-primary py-1.5 rounded-lg text-sm font-medium">Send notify-send</button>
+        </div>
+        <hr class="border-[#3a3c47]">
+        <div>
+            <h3 class="font-medium mb-2 text-sm"><i class="fas fa-camera mr-2"></i> Screenshot</h3>
+            <button id="screenSnapBtn" class="w-full btn-native py-1.5 rounded-lg text-sm">Capture remote screen</button>
+            <div id="snapPreview" class="mt-3 text-center text-xs"></div>
+        </div>
+    </div>
+    <button id="panelToggle" class="fixed right-5 bottom-5 bg-[#2b7be4] hover:bg-[#1c66c7] w-11 h-11 rounded-full shadow-lg flex items-center justify-center text-white z-30 transition-all">
+        <i class="fas fa-comment-dots text-base"></i>
+    </button>
+
+    <!-- Add device modal -->
+    <div id="addModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="modal-content w-full max-w-md p-6">
+            <h3 class="text-lg font-semibold mb-4">Register a Zorin device</h3>
+            <input type="text" id="newDeviceName" placeholder="Friendly name (e.g., Office PC)" class="w-full bg-[#1a1c23] border border-[#3e4050] rounded-lg p-2.5 mb-3 text-sm">
+            <input type="text" id="newDeviceUrl" placeholder="http://yourname.serveo.net/run" class="w-full bg-[#1a1c23] border border-[#3e4050] rounded-lg p-2.5 mb-3 text-sm">
+            <input type="password" id="newDeviceToken" placeholder="API token" class="w-full bg-[#1a1c23] border border-[#3e4050] rounded-lg p-2.5 mb-4 text-sm">
+            <div class="flex gap-3">
+                <button id="confirmAddDevice" class="flex-1 btn-primary py-2 rounded-lg">Add device</button>
+                <button id="closeAddModal" class="flex-1 btn-native py-2 rounded-lg">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    <script>
+        // ---------- IndexedDB (same as before, reliable) ----------
+        const DB_NAME = "ZorinFleetDB";
+        const STORE = "devices";
+        let db;
+
+        async function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, 2);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE))
+                        db.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function getAllDevices() {
+            if (!db) db = await openDB();
+            const tx = db.transaction(STORE, "readonly");
+            return new Promise(res => { const req = tx.objectStore(STORE).getAll(); req.onsuccess = () => res(req.result); });
+        }
+
+        async function addDevice(device) {
+            if (!db) db = await openDB();
+            const tx = db.transaction(STORE, "readwrite");
+            tx.objectStore(STORE).add(device);
+            await new Promise(res => tx.oncomplete = res);
+        }
+
+        async function deleteDevice(id) {
+            if (!db) db = await openDB();
+            const tx = db.transaction(STORE, "readwrite");
+            tx.objectStore(STORE).delete(id);
+            await new Promise(res => tx.oncomplete = res);
+        }
+
+        // ----- Command exec -----
+        async function execCommand(device, cmd, timeout = 25) {
+            const controller = new AbortController();
+            const tid = setTimeout(() => controller.abort(), timeout * 1000);
+            try {
+                const res = await fetch(device.url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ token: device.token, command: cmd }),
+                    signal: controller.signal
+                });
+                clearTimeout(tid);
+                const data = await res.json();
+                return { success: true, stdout: data.stdout, stderr: data.stderr, code: data.code };
+            } catch (err) {
+                clearTimeout(tid);
+                return { success: false, error: err.message };
+            }
+        }
+
+        function getHealthCommand() {
+            return `echo "CPU:$(top -bn1 | grep 'Cpu(s)' | awk '{print $2}' | cut -d'%' -f1)"; echo "MEM:$(free -b | awk '/^Mem:/{print $3}') $(free -b | awk '/^Mem:/{print $2}')"; echo "DISK:$(df -B1 /home | awk 'NR==2{print $3}') $(df -B1 /home | awk 'NR==2{print $2}')"`;
+        }
+
+        function parseHealth(output) {
+            let cpu = null, memUsed = null, memTotal = null, diskUsed = null, diskTotal = null;
+            output.split('\n').forEach(line => {
+                if (line.startsWith("CPU:")) cpu = parseFloat(line.substring(4));
+                if (line.startsWith("MEM:")) { let parts = line.split(' '); memUsed = parseInt(parts[1]); memTotal = parseInt(parts[2]); }
+                if (line.startsWith("DISK:")) { let parts = line.split(' '); diskUsed = parseInt(parts[1]); diskTotal = parseInt(parts[2]); }
+            });
+            return { cpu, memUsed, memTotal, diskUsed, diskTotal };
+        }
+
+        // ----- UI Rendering -----
+        async function refreshDevicesList() {
+            const devices = await getAllDevices();
+            const container = document.getElementById("devicesContainer");
+            if (!devices.length) {
+                container.innerHTML = `<div class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-desktop text-3xl mb-2 opacity-40"></i><p class="text-sm">No devices added. Click "Add computer" to start.</p></div>`;
+                return;
+            }
+            container.innerHTML = "";
+            for (const dev of devices) {
+                const card = document.createElement("div");
+                card.className = "device-card p-4";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-base font-semibold">${escapeHtml(dev.name)}</h3>
+                            <p class="text-xs text-gray-400 font-mono mt-0.5 break-all">${dev.url}</p>
+                        </div>
+                        <div class="flex gap-1">
+                            <button class="health-quick btn-native quick-btn" data-id="${dev.id}"><i class="fas fa-heartbeat mr-1"></i>Health</button>
+                            <button class="delete-device btn-native quick-btn bg-red-900/40 hover:bg-red-800/60" data-id="${dev.id}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div id="health-preview-${dev.id}" class="mt-2 text-xs text-gray-400 flex gap-3"></div>
+                    <div class="mt-3 flex gap-2">
+                        <button class="notify-quick btn-native quick-btn flex-1" data-id="${dev.id}"><i class="far fa-bell mr-1"></i>Notify</button>
+                        <button class="terminal-quick btn-native quick-btn flex-1" data-id="${dev.id}"><i class="fas fa-terminal mr-1"></i>Command</button>
+                    </div>
+                `;
+                container.appendChild(card);
+                card.querySelector(`.health-quick`).addEventListener("click", (e) => { e.stopPropagation(); fetchAndShowHealth(dev); });
+                card.querySelector(`.delete-device`).addEventListener("click", async (e) => { e.stopPropagation(); if(confirm(`Remove ${dev.name}?`)) { await deleteDevice(dev.id); refreshDevicesList(); refreshNotifyDropdown(); } });
+                card.querySelector(`.notify-quick`).addEventListener("click", (e) => { e.stopPropagation(); openPanelAndSelect(dev.id); });
+                card.querySelector(`.terminal-quick`).addEventListener("click", (e) => { e.stopPropagation(); openTerminalModal(dev); });
+                card.addEventListener("click", () => openDetailModal(dev));
+            }
+        }
+
+        async function fetchAndShowHealth(device) {
+            const res = await execCommand(device, getHealthCommand());
+            const previewDiv = document.getElementById(`health-preview-${device.id}`);
+            if (!res.success) { previewDiv.innerHTML = `<span class="text-red-400">⚠️ ${res.error}</span>`; return; }
+            const parsed = parseHealth(res.stdout);
+            const cpuStr = parsed.cpu !== null ? `${parsed.cpu.toFixed(1)}%` : "?";
+            const memPercent = parsed.memTotal ? ((parsed.memUsed / parsed.memTotal)*100).toFixed(0) : "?";
+            const diskPercent = parsed.diskTotal ? ((parsed.diskUsed / parsed.diskTotal)*100).toFixed(0) : "?";
+            previewDiv.innerHTML = `<span><i class="fas fa-microchip"></i> ${cpuStr}</span><span><i class="fas fa-memory"></i> RAM ${memPercent}%</span><span><i class="fas fa-hdd"></i> DISK ${diskPercent}%</span>`;
+        }
+
+        // Modal with terminal & charts
+        async function openDetailModal(device) {
+            const modalDiv = document.createElement("div");
+            modalDiv.className = "fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50";
+            modalDiv.innerHTML = `
+                <div class="modal-content w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-5">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold"><i class="fas fa-desktop text-blue-400 mr-2"></i>${escapeHtml(device.name)}</h2>
+                        <button class="close-modal text-gray-400 hover:text-white text-2xl leading-5">&times;</button>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-xs text-gray-400 mb-1">Terminal command</label>
+                        <textarea id="modalCmd" rows="2" class="terminal-input w-full rounded-lg p-2 text-sm" placeholder="e.g., notify-send 'Hello' || gnome-terminal || uptime"></textarea>
+                        <button id="modalRun" class="mt-2 btn-primary text-sm px-4 py-1.5 rounded-lg"><i class="fas fa-play mr-1"></i>Execute</button>
+                        <pre id="modalOutput" class="mt-2 bg-[#1a1c23] rounded-lg p-2 text-xs font-mono overflow-auto max-h-40"></pre>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mt-3">
+                        <div class="bg-[#1a1c23] rounded-lg p-2 text-center"><canvas id="cpuChartModal" class="w-full h-20"></canvas><span class="text-xs">CPU</span></div>
+                        <div class="bg-[#1a1c23] rounded-lg p-2 text-center"><canvas id="ramChartModal" class="w-full h-20"></canvas><span class="text-xs">RAM</span></div>
+                        <div class="bg-[#1a1c23] rounded-lg p-2 text-center"><canvas id="diskChartModal" class="w-full h-20"></canvas><span class="text-xs">/home</span></div>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button id="refreshHealthModal" class="btn-native text-sm px-3 py-1.5 rounded-lg"><i class="fas fa-chart-line mr-1"></i>Refresh health</button>
+                        <button id="screenshotModalBtn" class="btn-native text-sm px-3 py-1.5 rounded-lg"><i class="fas fa-camera mr-1"></i>Screenshot</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalDiv);
+            const closeBtn = modalDiv.querySelector(".close-modal");
+            closeBtn.onclick = () => modalDiv.remove();
+
+            const runBtn = modalDiv.querySelector("#modalRun");
+            const cmdInput = modalDiv.querySelector("#modalCmd");
+            const outputPre = modalDiv.querySelector("#modalOutput");
+            runBtn.onclick = async () => {
+                const cmd = cmdInput.value.trim();
+                if (!cmd) return;
+                outputPre.innerText = "⏳ Executing...";
+                const res = await execCommand(device, cmd);
+                outputPre.innerText = res.success ? `stdout:\n${res.stdout}\nstderr:\n${res.stderr}\ncode:${res.code}` : `Error: ${res.error}`;
+            };
+
+            let charts = {};
+            async function updateHealthCharts() {
+                const res = await execCommand(device, getHealthCommand());
+                if (!res.success) return;
+                const parsed = parseHealth(res.stdout);
+                const cpuVal = parsed.cpu || 0;
+                const ramPercent = parsed.memTotal ? (parsed.memUsed / parsed.memTotal)*100 : 0;
+                const diskPercent = parsed.diskTotal ? (parsed.diskUsed / parsed.diskTotal)*100 : 0;
+                if (charts.cpu) charts.cpu.destroy();
+                if (charts.ram) charts.ram.destroy();
+                if (charts.disk) charts.disk.destroy();
+                charts.cpu = new Chart(document.getElementById("cpuChartModal"), { type: 'doughnut', data: { labels: ['Used','Free'], datasets: [{ data: [cpuVal, 100-cpuVal], backgroundColor: ['#2b7be4','#3a3c47'] }] } });
+                charts.ram = new Chart(document.getElementById("ramChartModal"), { type: 'doughnut', data: { labels: ['Used','Free'], datasets: [{ data: [ramPercent, 100-ramPercent], backgroundColor: ['#8b5cf6','#3a3c47'] }] } });
+                charts.disk = new Chart(document.getElementById("diskChartModal"), { type: 'doughnut', data: { labels: ['Used','Free'], datasets: [{ data: [diskPercent, 100-diskPercent], backgroundColor: ['#f59e0b','#3a3c47'] }] } });
+            }
+            modalDiv.querySelector("#refreshHealthModal").onclick = updateHealthCharts;
+            modalDiv.querySelector("#screenshotModalBtn").onclick = async () => {
+                const cmd = `import -window root /tmp/shot.png && base64 /tmp/shot.png | tr -d '\n'`;
+                const res = await execCommand(device, cmd, 10);
+                if (res.success && res.stdout) {
+                    const imgWin = window.open();
+                    imgWin.document.write(`<img src="data:image/png;base64,${res.stdout}" style="max-width:100%">`);
+                } else alert("Screenshot failed. Ensure 'import' (imagemagick) installed on remote: sudo apt install imagemagick");
+            };
+            updateHealthCharts();
+        }
+
+        function openTerminalModal(device) { openDetailModal(device); }
+
+        // Side panel logic
+        async function refreshNotifyDropdown() {
+            const devices = await getAllDevices();
+            const select = document.getElementById("notifyDeviceSelect");
+            select.innerHTML = devices.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        }
+        function openPanelAndSelect(deviceId) {
+            document.getElementById("notifyDeviceSelect").value = deviceId;
+            document.getElementById("sidePanel").classList.add("translate-x-0");
+        }
+
+        // Event listeners
+        document.getElementById("panelToggle").onclick = () => document.getElementById("sidePanel").classList.toggle("translate-x-0");
+        document.getElementById("closePanelBtn").onclick = () => document.getElementById("sidePanel").classList.remove("translate-x-0");
+        document.getElementById("sendNotifyBtn").onclick = async () => {
+            const select = document.getElementById("notifyDeviceSelect");
+            const deviceId = parseInt(select.value);
+            const devices = await getAllDevices();
+            const dev = devices.find(d => d.id === deviceId);
+            if (!dev) return;
+            const msg = document.getElementById("notifyMessage").value;
+            if (!msg) return;
+            const cmd = `notify-send "Zorin Fleet" "${msg.replace(/"/g, '\\"')}"`;
+            const res = await execCommand(dev, cmd);
+            alert(res.success ? "Notification sent" : "Failed: " + res.error);
+        };
+        document.getElementById("screenSnapBtn").onclick = async () => {
+            const select = document.getElementById("notifyDeviceSelect");
+            const deviceId = parseInt(select.value);
+            const devices = await getAllDevices();
+            const dev = devices.find(d => d.id === deviceId);
+            if (!dev) return;
+            const cmd = `import -window root /tmp/shot.png && base64 /tmp/shot.png | tr -d '\n'`;
+            const res = await execCommand(dev, cmd, 10);
+            const preview = document.getElementById("snapPreview");
+            if (res.success && res.stdout) {
+                preview.innerHTML = `<img src="data:image/png;base64,${res.stdout}" class="rounded border border-gray-600 max-h-28 mx-auto">`;
+            } else preview.innerHTML = `<span class="text-red-400">Failed: ${res.error}</span>`;
+        };
+
+        // Add device modal
+        const addModal = document.getElementById("addModal");
+        document.getElementById("openAddModalBtn").onclick = () => addModal.classList.remove("hidden");
+        document.getElementById("closeAddModal").onclick = () => addModal.classList.add("hidden");
+        document.getElementById("confirmAddDevice").onclick = async () => {
+            const name = document.getElementById("newDeviceName").value.trim();
+            const url = document.getElementById("newDeviceUrl").value.trim();
+            const token = document.getElementById("newDeviceToken").value.trim();
+            if (!name || !url || !token) return alert("All fields required");
+            await addDevice({ name, url, token });
+            addModal.classList.add("hidden");
+            document.getElementById("newDeviceName").value = "";
+            document.getElementById("newDeviceUrl").value = "";
+            document.getElementById("newDeviceToken").value = "";
+            refreshDevicesList();
+            refreshNotifyDropdown();
+        };
+
+        // Splash and init
+        window.onload = async () => {
+            await openDB();
+            await refreshDevicesList();
+            await refreshNotifyDropdown();
+            setTimeout(() => {
+                const splash = document.getElementById("splash");
+                splash.classList.add("hide");
+                setTimeout(() => {
+                    splash.style.display = "none";
+                    document.getElementById("app").classList.remove("hidden");
+                }, 1200);
+            }, 1800);
+        };
+
+        function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+    </script>
+</body>
+</html>
