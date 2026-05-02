@@ -3,24 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Zorin Fleet</title>
-    <!-- Tailwind + Font Awesome + Chart.js -->
+    <title>Zorin Fleet – Leasing Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        /* Override Tailwind defaults to feel more native */
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
             background: #1e1f28;
         }
-        /* Native‑style scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #2a2c35; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #5a5f73; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #7c83a0; }
-
-        /* Indented Z (debossed) inside hexagon */
         .z-deboss {
             width: 56px;
             height: 56px;
@@ -34,9 +28,7 @@
             color: #8f9bb5;
             text-shadow: 0 1px 0 rgba(0,0,0,0.4);
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 2px 4px rgba(255,255,255,0.05);
-            background-blend-mode: overlay;
         }
-        /* For larger splash logo */
         .splash-logo {
             width: 120px;
             height: 120px;
@@ -44,8 +36,6 @@
             background: linear-gradient(145deg, #2b3b5c, #0f1728);
             box-shadow: inset 0 4px 8px rgba(0,0,0,0.6), 0 8px 20px rgba(0,0,0,0.3);
         }
-
-        /* Splash animations (flare + swipe) */
         .splash {
             position: fixed;
             inset: 0;
@@ -58,9 +48,9 @@
             transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes flarePulse {
-            0% { transform: scale(0.8); opacity: 0; box-shadow: inset 0 0 0 0 rgba(63,140,255,0.2), 0 0 0 0 rgba(63,140,255,0.4);}
+            0% { transform: scale(0.8); opacity: 0; }
             70% { transform: scale(1.05);}
-            100% { transform: scale(1); opacity: 1; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 0 0 0 rgba(63,140,255,0);}
+            100% { transform: scale(1); opacity: 1; }
         }
         .splash-text {
             margin-top: 32px;
@@ -77,12 +67,10 @@
             animation-delay: 0.3s;
         }
         @keyframes swipeReveal {
-            0% { opacity: 0; transform: translateY(30px); clip-path: inset(0 100% 0 0);}
-            100% { opacity: 1; transform: translateY(0); clip-path: inset(0 0 0 0);}
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
         .splash.hide { opacity: 0; pointer-events: none; }
-
-        /* Premium card style – lighter, softer */
         .device-card {
             background: #2a2c36;
             border: 1px solid #3e4050;
@@ -96,7 +84,6 @@
             transform: translateY(-2px);
             box-shadow: 0 12px 24px -12px rgba(0,0,0,0.4);
         }
-        /* Refined buttons – less chunky, native feel */
         .btn-native {
             background: #3a3c47;
             border: none;
@@ -105,7 +92,6 @@
             font-weight: 500;
             font-size: 0.8rem;
             transition: all 0.1s ease;
-            line-height: 1.4;
         }
         .btn-native:hover {
             background: #4a4e60;
@@ -114,26 +100,21 @@
         .btn-primary {
             background: #2b7be4;
             color: white;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         .btn-primary:hover {
             background: #1c66c7;
-            transform: translateY(-1px);
         }
-        /* Side panel (app‑like) */
         .side-panel {
             background: #24262f;
             border-left: 1px solid #3a3c47;
             box-shadow: -6px 0 24px rgba(0,0,0,0.3);
         }
-        /* Modal native */
         .modal-content {
             background: #2a2c36;
             border: 1px solid #4a4e60;
             border-radius: 20px;
             box-shadow: 0 24px 40px rgba(0,0,0,0.4);
         }
-        /* Terminal input */
         .terminal-input {
             background: #1a1c23;
             border: 1px solid #3e4050;
@@ -142,55 +123,49 @@
             color: #e2e4ec;
             border-radius: 10px;
         }
-        /* Quick action buttons inside cards – more compact */
         .quick-btn {
             padding: 4px 10px;
             font-size: 0.75rem;
             border-radius: 6px;
-            font-weight: 500;
         }
-        /* Dropdown and inputs */
-        select, input, textarea {
-            transition: border-color 0.1s, box-shadow 0.1s;
+        .custom-btn {
+            background: #2a2c36;
+            border: 1px solid #5a6b8c;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.1s;
         }
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: #2b7be4;
-            box-shadow: 0 0 0 2px rgba(43,123,228,0.2);
+        .custom-btn:hover {
+            background: #3e4055;
         }
     </style>
 </head>
 <body class="bg-[#1e1f28] text-gray-200 antialiased">
 
-    <!-- Splash screen with indented Z -->
     <div id="splash" class="splash">
         <div class="z-deboss splash-logo">Z</div>
         <div class="splash-text">ZORIN FLEET</div>
     </div>
 
-    <!-- Main App (hidden initially) -->
     <div id="app" class="hidden max-w-7xl mx-auto px-5 py-6">
-        <!-- Header with debossed Z -->
         <div class="flex flex-wrap justify-between items-center border-b border-[#3a3c47] pb-4 mb-6">
             <div class="flex items-center gap-3">
                 <div class="z-deboss">Z</div>
                 <div>
-                    <h1 class="text-2xl font-semibold tracking-tight">Zorin Fleet</h1>
-                    <p class="text-gray-400 text-xs">Multi‑device command & control</p>
+                    <h1 class="text-2xl font-semibold tracking-tight">Zorin Fleet · Leasing Edition</h1>
+                    <p class="text-gray-400 text-xs">root‑level control + custom commands + lockout</p>
                 </div>
             </div>
             <button id="openAddModalBtn" class="btn-native btn-primary flex items-center gap-2 px-4 py-1.5">
                 <i class="fas fa-plus text-sm"></i> <span>Add computer</span>
             </button>
         </div>
-
-        <!-- Device grid -->
-        <div id="devicesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <!-- dynamic -->
-        </div>
+        <div id="devicesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
     </div>
 
-    <!-- Side panel (native) -->
+    <!-- Side panel (notifications + screenshot) -->
     <div id="sidePanel" class="side-panel fixed right-0 top-0 h-full w-96 transform translate-x-full transition-transform duration-300 z-40 p-5 flex flex-col gap-4">
         <div class="flex justify-between items-center">
             <h2 class="text-md font-semibold"><i class="fas fa-bell mr-2 text-blue-400"></i> Quick actions</h2>
@@ -216,11 +191,11 @@
         <i class="fas fa-comment-dots text-base"></i>
     </button>
 
-    <!-- Add device modal -->
+    <!-- Add device modal (unchanged) -->
     <div id="addModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
         <div class="modal-content w-full max-w-md p-6">
             <h3 class="text-lg font-semibold mb-4">Register a Zorin device</h3>
-            <input type="text" id="newDeviceName" placeholder="Friendly name (e.g., Office PC)" class="w-full bg-[#1a1c23] border border-[#3e4050] rounded-lg p-2.5 mb-3 text-sm">
+            <input type="text" id="newDeviceName" placeholder="Friendly name (e.g., Laptop01)" class="w-full bg-[#1a1c23] border border-[#3e4050] rounded-lg p-2.5 mb-3 text-sm">
             <input type="text" id="newDeviceUrl" placeholder="http://yourname.serveo.net/run" class="w-full bg-[#1a1c23] border border-[#3e4050] rounded-lg p-2.5 mb-3 text-sm">
             <input type="password" id="newDeviceToken" placeholder="API token" class="w-full bg-[#1a1c23] border border-[#3e4050] rounded-lg p-2.5 mb-4 text-sm">
             <div class="flex gap-3">
@@ -232,45 +207,72 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
     <script>
-        // ---------- IndexedDB (same as before, reliable) ----------
+        // ---------- IndexedDB for devices and custom commands ----------
         const DB_NAME = "ZorinFleetDB";
-        const STORE = "devices";
+        const DEVICE_STORE = "devices";
+        const COMMAND_STORE = "custom_commands";  // key: deviceId, value: array of {label, command}
         let db;
 
         async function openDB() {
             return new Promise((resolve, reject) => {
-                const req = indexedDB.open(DB_NAME, 2);
+                const req = indexedDB.open(DB_NAME, 3);
                 req.onupgradeneeded = (e) => {
                     const db = e.target.result;
-                    if (!db.objectStoreNames.contains(STORE))
-                        db.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
+                    if (!db.objectStoreNames.contains(DEVICE_STORE))
+                        db.createObjectStore(DEVICE_STORE, { keyPath: "id", autoIncrement: true });
+                    if (!db.objectStoreNames.contains(COMMAND_STORE))
+                        db.createObjectStore(COMMAND_STORE, { keyPath: "deviceId" });
                 };
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
         }
 
+        // Device CRUD
         async function getAllDevices() {
             if (!db) db = await openDB();
-            const tx = db.transaction(STORE, "readonly");
-            return new Promise(res => { const req = tx.objectStore(STORE).getAll(); req.onsuccess = () => res(req.result); });
+            const tx = db.transaction(DEVICE_STORE, "readonly");
+            return new Promise(res => { const req = tx.objectStore(DEVICE_STORE).getAll(); req.onsuccess = () => res(req.result); });
         }
-
         async function addDevice(device) {
             if (!db) db = await openDB();
-            const tx = db.transaction(STORE, "readwrite");
-            tx.objectStore(STORE).add(device);
+            const tx = db.transaction(DEVICE_STORE, "readwrite");
+            tx.objectStore(DEVICE_STORE).add(device);
             await new Promise(res => tx.oncomplete = res);
         }
-
         async function deleteDevice(id) {
             if (!db) db = await openDB();
-            const tx = db.transaction(STORE, "readwrite");
-            tx.objectStore(STORE).delete(id);
+            const tx = db.transaction([DEVICE_STORE, COMMAND_STORE], "readwrite");
+            tx.objectStore(DEVICE_STORE).delete(id);
+            tx.objectStore(COMMAND_STORE).delete(id); // also delete custom commands for this device
             await new Promise(res => tx.oncomplete = res);
         }
 
-        // ----- Command exec -----
+        // Custom commands per device
+        async function getCustomCommands(deviceId) {
+            if (!db) db = await openDB();
+            const tx = db.transaction(COMMAND_STORE, "readonly");
+            const store = tx.objectStore(COMMAND_STORE);
+            const record = await new Promise(res => { const req = store.get(deviceId); req.onsuccess = () => res(req.result); });
+            return record ? record.commands : [];
+        }
+        async function saveCustomCommand(deviceId, label, command) {
+            if (!db) db = await openDB();
+            const existing = await getCustomCommands(deviceId);
+            const newCommands = [...existing, { label, command, id: Date.now() }];
+            const tx = db.transaction(COMMAND_STORE, "readwrite");
+            tx.objectStore(COMMAND_STORE).put({ deviceId, commands: newCommands });
+            await new Promise(res => tx.oncomplete = res);
+        }
+        async function deleteCustomCommand(deviceId, cmdId) {
+            let commands = await getCustomCommands(deviceId);
+            commands = commands.filter(c => c.id !== cmdId);
+            const tx = db.transaction(COMMAND_STORE, "readwrite");
+            tx.objectStore(COMMAND_STORE).put({ deviceId, commands });
+            await new Promise(res => tx.oncomplete = res);
+        }
+
+        // ----- Command exec (same as before) -----
         async function execCommand(device, cmd, timeout = 25) {
             const controller = new AbortController();
             const tid = setTimeout(() => controller.abort(), timeout * 1000);
@@ -293,7 +295,6 @@
         function getHealthCommand() {
             return `echo "CPU:$(top -bn1 | grep 'Cpu(s)' | awk '{print $2}' | cut -d'%' -f1)"; echo "MEM:$(free -b | awk '/^Mem:/{print $3}') $(free -b | awk '/^Mem:/{print $2}')"; echo "DISK:$(df -B1 /home | awk 'NR==2{print $3}') $(df -B1 /home | awk 'NR==2{print $2}')"`;
         }
-
         function parseHealth(output) {
             let cpu = null, memUsed = null, memTotal = null, diskUsed = null, diskTotal = null;
             output.split('\n').forEach(line => {
@@ -304,7 +305,7 @@
             return { cpu, memUsed, memTotal, diskUsed, diskTotal };
         }
 
-        // ----- UI Rendering -----
+        // ----- UI rendering -----
         async function refreshDevicesList() {
             const devices = await getAllDevices();
             const container = document.getElementById("devicesContainer");
@@ -337,7 +338,7 @@
                 card.querySelector(`.health-quick`).addEventListener("click", (e) => { e.stopPropagation(); fetchAndShowHealth(dev); });
                 card.querySelector(`.delete-device`).addEventListener("click", async (e) => { e.stopPropagation(); if(confirm(`Remove ${dev.name}?`)) { await deleteDevice(dev.id); refreshDevicesList(); refreshNotifyDropdown(); } });
                 card.querySelector(`.notify-quick`).addEventListener("click", (e) => { e.stopPropagation(); openPanelAndSelect(dev.id); });
-                card.querySelector(`.terminal-quick`).addEventListener("click", (e) => { e.stopPropagation(); openTerminalModal(dev); });
+                card.querySelector(`.terminal-quick`).addEventListener("click", (e) => { e.stopPropagation(); openDetailModal(dev); });
                 card.addEventListener("click", () => openDetailModal(dev));
             }
         }
@@ -353,19 +354,22 @@
             previewDiv.innerHTML = `<span><i class="fas fa-microchip"></i> ${cpuStr}</span><span><i class="fas fa-memory"></i> RAM ${memPercent}%</span><span><i class="fas fa-hdd"></i> DISK ${diskPercent}%</span>`;
         }
 
-        // Modal with terminal & charts
+        // Modal with terminal, charts, custom buttons, lockout
         async function openDetailModal(device) {
             const modalDiv = document.createElement("div");
             modalDiv.className = "fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50";
             modalDiv.innerHTML = `
-                <div class="modal-content w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-5">
+                <div class="modal-content w-11/12 max-w-4xl max-h-[85vh] overflow-y-auto p-5">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="text-lg font-semibold"><i class="fas fa-desktop text-blue-400 mr-2"></i>${escapeHtml(device.name)}</h2>
                         <button class="close-modal text-gray-400 hover:text-white text-2xl leading-5">&times;</button>
                     </div>
                     <div class="mb-3">
                         <label class="block text-xs text-gray-400 mb-1">Terminal command</label>
-                        <textarea id="modalCmd" rows="2" class="terminal-input w-full rounded-lg p-2 text-sm" placeholder="e.g., notify-send 'Hello' || gnome-terminal || uptime"></textarea>
+                        <div class="flex gap-2">
+                            <textarea id="modalCmd" rows="2" class="terminal-input flex-1 rounded-lg p-2 text-sm" placeholder="e.g., notify-send 'Hello' || uptime"></textarea>
+                            <button id="saveCmdBtn" class="btn-native self-start mt-1 px-3 py-1.5" title="Save as custom button"><i class="fas fa-save"></i> Save</button>
+                        </div>
                         <button id="modalRun" class="mt-2 btn-primary text-sm px-4 py-1.5 rounded-lg"><i class="fas fa-play mr-1"></i>Execute</button>
                         <pre id="modalOutput" class="mt-2 bg-[#1a1c23] rounded-lg p-2 text-xs font-mono overflow-auto max-h-40"></pre>
                     </div>
@@ -374,9 +378,14 @@
                         <div class="bg-[#1a1c23] rounded-lg p-2 text-center"><canvas id="ramChartModal" class="w-full h-20"></canvas><span class="text-xs">RAM</span></div>
                         <div class="bg-[#1a1c23] rounded-lg p-2 text-center"><canvas id="diskChartModal" class="w-full h-20"></canvas><span class="text-xs">/home</span></div>
                     </div>
-                    <div class="flex gap-2 mt-3">
+                    <div class="flex flex-wrap gap-2 mt-3">
                         <button id="refreshHealthModal" class="btn-native text-sm px-3 py-1.5 rounded-lg"><i class="fas fa-chart-line mr-1"></i>Refresh health</button>
                         <button id="screenshotModalBtn" class="btn-native text-sm px-3 py-1.5 rounded-lg"><i class="fas fa-camera mr-1"></i>Screenshot</button>
+                        <button id="lockoutModalBtn" class="btn-native text-sm px-3 py-1.5 rounded-lg bg-red-800 hover:bg-red-700"><i class="fas fa-lock mr-1"></i>Lockout student</button>
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-xs text-gray-400 mb-2">📌 Custom command buttons (click to run)</div>
+                        <div id="customButtonsContainer" class="flex flex-wrap gap-2"></div>
                     </div>
                 </div>
             `;
@@ -384,8 +393,48 @@
             const closeBtn = modalDiv.querySelector(".close-modal");
             closeBtn.onclick = () => modalDiv.remove();
 
-            const runBtn = modalDiv.querySelector("#modalRun");
+            // Load custom commands
+            async function refreshCustomButtons() {
+                const container = modalDiv.querySelector("#customButtonsContainer");
+                const commands = await getCustomCommands(device.id);
+                if (commands.length === 0) {
+                    container.innerHTML = '<span class="text-gray-500 text-xs italic">No custom buttons. Type a command and click Save.</span>';
+                    return;
+                }
+                container.innerHTML = "";
+                for (const cmd of commands) {
+                    const btn = document.createElement("button");
+                    btn.className = "custom-btn";
+                    btn.innerHTML = `<i class="fas fa-terminal mr-1"></i> ${escapeHtml(cmd.label)} <span class="text-red-400 hover:text-red-300 ml-1" data-id="${cmd.id}" data-delete="true">✕</span>`;
+                    btn.onclick = async (e) => {
+                        if (e.target.getAttribute("data-delete")) {
+                            e.stopPropagation();
+                            await deleteCustomCommand(device.id, cmd.id);
+                            refreshCustomButtons();
+                        } else {
+                            const res = await execCommand(device, cmd.command);
+                            const outputPre = modalDiv.querySelector("#modalOutput");
+                            outputPre.innerText = res.success ? `stdout:\n${res.stdout}\nstderr:\n${res.stderr}\ncode:${res.code}` : `Error: ${res.error}`;
+                        }
+                    };
+                    container.appendChild(btn);
+                }
+            }
+
+            // Save current command as button
+            const saveBtn = modalDiv.querySelector("#saveCmdBtn");
             const cmdInput = modalDiv.querySelector("#modalCmd");
+            saveBtn.onclick = async () => {
+                const cmd = cmdInput.value.trim();
+                if (!cmd) return alert("Enter a command first.");
+                let label = prompt("Button label (e.g., 'Reboot', 'Update'):", cmd.substring(0, 30));
+                if (!label) label = cmd.substring(0, 30);
+                await saveCustomCommand(device.id, label, cmd);
+                refreshCustomButtons();
+                cmdInput.value = "";
+            };
+
+            const runBtn = modalDiv.querySelector("#modalRun");
             const outputPre = modalDiv.querySelector("#modalOutput");
             runBtn.onclick = async () => {
                 const cmd = cmdInput.value.trim();
@@ -395,6 +444,16 @@
                 outputPre.innerText = res.success ? `stdout:\n${res.stdout}\nstderr:\n${res.stderr}\ncode:${res.code}` : `Error: ${res.error}`;
             };
 
+            // Lockout: disable student account
+            const lockoutBtn = modalDiv.querySelector("#lockoutModalBtn");
+            lockoutBtn.onclick = async () => {
+                if (!confirm("This will disable the student's login (passwd -l student). Continue?")) return;
+                const res = await execCommand(device, "passwd -l student");
+                if (res.success) alert("Student account locked. They cannot log in anymore.");
+                else alert("Lockout failed: " + res.error);
+            };
+
+            // Health charts (unchanged)
             let charts = {};
             async function updateHealthCharts() {
                 const res = await execCommand(device, getHealthCommand());
@@ -420,11 +479,10 @@
                 } else alert("Screenshot failed. Ensure 'import' (imagemagick) installed on remote: sudo apt install imagemagick");
             };
             updateHealthCharts();
+            refreshCustomButtons();
         }
 
-        function openTerminalModal(device) { openDetailModal(device); }
-
-        // Side panel logic
+        // Side panel logic (same as before)
         async function refreshNotifyDropdown() {
             const devices = await getAllDevices();
             const select = document.getElementById("notifyDeviceSelect");
@@ -435,7 +493,6 @@
             document.getElementById("sidePanel").classList.add("translate-x-0");
         }
 
-        // Event listeners
         document.getElementById("panelToggle").onclick = () => document.getElementById("sidePanel").classList.toggle("translate-x-0");
         document.getElementById("closePanelBtn").onclick = () => document.getElementById("sidePanel").classList.remove("translate-x-0");
         document.getElementById("sendNotifyBtn").onclick = async () => {
@@ -464,7 +521,7 @@
             } else preview.innerHTML = `<span class="text-red-400">Failed: ${res.error}</span>`;
         };
 
-        // Add device modal
+        // Add device modal (same)
         const addModal = document.getElementById("addModal");
         document.getElementById("openAddModalBtn").onclick = () => addModal.classList.remove("hidden");
         document.getElementById("closeAddModal").onclick = () => addModal.classList.add("hidden");
@@ -482,7 +539,6 @@
             refreshNotifyDropdown();
         };
 
-        // Splash and init
         window.onload = async () => {
             await openDB();
             await refreshDevicesList();
@@ -496,7 +552,6 @@
                 }, 1200);
             }, 1800);
         };
-
         function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
     </script>
 </body>
